@@ -1,11 +1,9 @@
 import { WebContainer } from '@webcontainer/api'
 
 // Call only once
-let _webcontainerInstance: WebContainer
+let _webcontainerInstance: Promise<WebContainer>
 export async function useWebContainer() {
-  if (!_webcontainerInstance) {
-    _webcontainerInstance = await WebContainer.boot()
-    return _webcontainerInstance
-  }
-  return _webcontainerInstance
+  if (!_webcontainerInstance)
+    _webcontainerInstance = WebContainer.boot()
+  return await _webcontainerInstance
 }
