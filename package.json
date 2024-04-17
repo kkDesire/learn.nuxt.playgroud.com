@@ -16,6 +16,8 @@
     "@nuxtjs/color-mode": "^3.4.0",
     "@vueuse/core": "^10.9.0",
     "@vueuse/nuxt": "^10.9.0",
+    "@webcontainer/api": "^1.1.9",
+    "@xterm/xterm": "^5.5.0",
     "nuxt": "^3.11.2",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
