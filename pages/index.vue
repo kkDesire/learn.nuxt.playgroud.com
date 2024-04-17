@@ -3,17 +3,23 @@ const { x, y } = useMouse()
 const color = useColorMode()
 
 function toggleDark() {
-  color.value = color.value === 'dark'
-    ? 'light'
-    : 'dark'
+  color.value = color.value === 'dark' ? 'light' : 'dark'
 }
 </script>
 
 <template>
-  <div class="text-red">
-    Hello World: {{ x }}, {{ y }}
-    <button @click="toggleDark">
-      {{ color.value }}
-    </button>
+  <div class="grid grid-cols-[1fr_2fr] h-full">
+    <div class="border-r border-base p4">
+      Content
+      <div class="text-red">
+        Hello World: {{ x }}, {{ y }} <br>
+        <button @click="toggleDark">
+          {{ color.value }}
+        </button>
+      </div>
+    </div>
+    <div class="p4">
+      Playground
+    </div>
   </div>
 </template>
