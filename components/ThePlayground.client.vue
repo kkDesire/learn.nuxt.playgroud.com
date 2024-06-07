@@ -62,6 +62,13 @@ async function startDevServer() {
   status.value = 'start'
   const devProcess = await wc?.spawn('pnpm', ['run', 'dev'])
   stream.value = devProcess.output
+
+  // In dev, when doing HMR, we kill the previous process reussing same WebConatiner
+  if (import.meta.hot) {
+    import.meta.hot.accept(() => {
+      devProcess.kill()
+    })
+  }
 }
 
 watchEffect(() => {
@@ -73,7 +80,7 @@ onMounted(startDevServer)
 </script>
 
 <template>
-  <div max-h-full w-full grid="~ rows-[2fr_1fr]" of-hidden relative>
+  <div max-h-full w-full grid="~ rows-[3fr_1fr]" of-hidden relative>
     <iframe v-show="status === 'ready'" ref="iframe" w-full h-full />
     <div
       v-if="status !== 'ready'"
@@ -84,6 +91,6 @@ onMounted(startDevServer)
       <div i-svg-spinners-tadpole />
       {{ status }}ing...
     </div>
-    <TerminalOutput :stream="stream" h="33%" />
+    <TerminalOutput :stream="stream" />
   </div>
 </template>
