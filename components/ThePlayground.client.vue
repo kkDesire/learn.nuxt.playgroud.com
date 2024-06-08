@@ -9,41 +9,34 @@ const error = shallowRef<{ message: string }>()
 const stream = ref<ReadableStream>()
 
 async function startDevServer() {
-  const rawFiles = import.meta.glob(
-    ['../templates/basic/*.*', '!**/node_modules/**'],
-    {
+  const tree = globalFilesToWebcontainerFs(
+    '../templates/nitro/',
+    import.meta.glob([
+      '../templates/nitro/**/*.*',
+      '!**/node_modules/**',
+    ], {
       query: 'raw',
-      import: 'default',
       eager: true,
-    },
-  )
-
-  const files = Object.fromEntries<any>(
-    Object.entries(rawFiles).map(([path, content]) => {
-      return [
-        path.replace('../templates/basic/', ''),
-        {
-          file: {
-            contents: content,
-          },
-        },
-      ]
+      import: 'default',
     }),
   )
+
   const wc = await useWebContainer()
 
-  wc.on('server-ready', (port: any, url: any) => {
+  wc.on('server-ready', (port, url) => {
     status.value = 'ready'
     wcUrl.value = url
   })
 
-  wc.on('error', (err: any) => {
+  wc.on('error', (err) => {
     status.value = 'error'
     error.value = err
   })
+  console.log('Treeeeeee', tree)
+
   status.value = 'mount'
 
-  await wc.mount(files)
+  await wc.mount(tree)
 
   status.value = 'install'
 
