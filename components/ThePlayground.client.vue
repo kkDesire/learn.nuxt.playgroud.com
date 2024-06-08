@@ -1,5 +1,8 @@
 <!-- eslint-disable no-console -->
 <script setup lang="ts">
+// @ts-expect-error missing types
+import { Pane, Splitpanes } from 'splitpanes'
+
 const iframe = ref<HTMLIFrameElement>()
 const wcUrl = ref<string>()
 
@@ -7,12 +10,16 @@ type Status = 'init' | 'mount' | 'install' | 'start' | 'ready' | 'error'
 const status = ref<Status>('init')
 const error = shallowRef<{ message: string }>()
 const stream = ref<ReadableStream>()
+const isDragging = usePanelDragging()
+const panelSizeEditor = useLocalStorage('nuxt-playground-panel-editor', 30)
+const panelSizeFrame = useLocalStorage('nuxt-playground-panel-frame', 30)
+const panelSizeTerminal = useLocalStorage('nuxt-playground-panel-terminal', 30)
 
 async function startDevServer() {
   const tree = globalFilesToWebcontainerFs(
-    '../templates/nitro/',
+    '../templates/basic/',
     import.meta.glob([
-      '../templates/nitro/**/*.*',
+      '../templates/basic/**/*.*',
       '!**/node_modules/**',
     ], {
       query: 'raw',
@@ -32,7 +39,6 @@ async function startDevServer() {
     status.value = 'error'
     error.value = err
   })
-  console.log('Treeeeeee', tree)
 
   status.value = 'mount'
 
@@ -69,21 +75,56 @@ watchEffect(() => {
     iframe.value.src = wcUrl.value
 })
 
+function startDragging() {
+  isDragging.value = true
+}
+
+function endDragging(e: { size: number }[]) {
+  isDragging.value = false
+  panelSizeEditor.value = e[0].size
+  panelSizeFrame.value = e[1].size
+  panelSizeTerminal.value = e[2].size
+}
+
 onMounted(startDevServer)
 </script>
 
 <template>
-  <div max-h-full w-full grid="~ rows-[3fr_1fr]" of-hidden relative>
-    <iframe v-show="status === 'ready'" ref="iframe" w-full h-full />
-    <div
-      v-if="status !== 'ready'"
-      flex="~ col items-center justify-center "
-      capitalize
-      text-lg
-    >
-      <div i-svg-spinners-tadpole />
-      {{ status }}ing...
-    </div>
-    <TerminalOutput :stream="stream" />
-  </div>
+  <Splitpanes
+    horizontal
+    max-h-full
+    w-full
+    of-hidden
+    relative
+    @resize="startDragging"
+    @resized="endDragging"
+  >
+    <Pane :size="panelSizeEditor" min-size="10">
+      [This is the editor]
+    </Pane>
+    <Pane :size="panelSizeFrame" min-size="10">
+      <iframe
+        v-show="status === 'ready'"
+        ref="iframe"
+        w-full h-full
+        :class="{
+          'pointer-events-none': isDragging,
+        }"
+      />
+      <div
+        v-if="status !== 'ready'"
+        flex="~ col items-center justify-center"
+        h-full
+        capitalize
+        text-lg
+      >
+        <div i-svg-spinners-tadpole />
+        {{ status }}ing...
+      </div>
+    </Pane>
+
+    <Pane :size="panelSizeTerminal">
+      <TerminalOutput :stream="stream" />
+    </Pane>
+  </Splitpanes>
 </template>
