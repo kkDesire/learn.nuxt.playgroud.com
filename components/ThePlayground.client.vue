@@ -32,7 +32,9 @@ async function startDevServer() {
 
   wc.on('server-ready', (port, url) => {
     status.value = 'ready'
-    wcUrl.value = url
+
+    if (!wcUrl.value)
+      wcUrl.value = url
   })
 
   wc.on('error', (err) => {
@@ -70,10 +72,10 @@ async function startDevServer() {
   }
 }
 
-watchEffect(() => {
-  if (iframe.value && wcUrl.value)
-    iframe.value.src = wcUrl.value
-})
+// watchEffect(() => {
+//   if (iframe.value && wcUrl.value)
+//     iframe.value.src = wcUrl.value
+// })
 
 function startDragging() {
   isDragging.value = true
@@ -104,9 +106,12 @@ onMounted(startDevServer)
     </Pane>
     <Pane :size="panelSizeFrame" min-size="10">
       <iframe
-        v-show="status === 'ready'"
-        ref="iframe"
-        w-full h-full
+        v-if="!!wcUrl" ref="iframe"
+        :src="wcUrl"
+        class="w-full h-full"
+        allow="geolocation; microphone; camera; payment; autoplay; serial; cross-origin-isolated"
+        w-full
+        h-full
         :class="{
           'pointer-events-none': isDragging,
         }"

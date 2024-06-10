@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   },
   nitro: {
     routeRules: {
-      '/*': {
+      '**': {
         cors: true,
         headers: {
           'Cross-Origin-Embedder-Policy': 'require-corp',
